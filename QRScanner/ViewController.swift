@@ -25,7 +25,7 @@ class ViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
+
     var prescriptionLabel: UILabel = {
         let label = UILabel()
         label.text = "Наведите рамку на QR код"
@@ -37,18 +37,13 @@ class ViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
-    func setupLayout() {
-        qrCodeFrameView.widthAnchor.constraint(equalToConstant: 200).isActive = true
-        qrCodeFrameView.heightAnchor.constraint(equalToConstant: 200).isActive = true
-        qrCodeFrameView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-        qrCodeFrameView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor, constant: -50).isActive = true
-        
-        prescriptionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20).isActive = true
-        prescriptionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20).isActive = true
-        prescriptionLabel.topAnchor.constraint(equalTo: qrCodeFrameView.bottomAnchor, constant: 40).isActive = true
-    }
-    
+
+//    var container: UIView = {
+//        let view = UIView()
+//        view.backgroundColor = .red
+//        return view
+//    }()
+
     // MARK: - Настройка видео
     
     func setupVideo() {
@@ -68,32 +63,50 @@ class ViewController: UIViewController {
         output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
         output.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
         
-        // 5
         video = AVCaptureVideoPreviewLayer(session: session)
-        video.frame = view.layer.bounds
+        session.startRunning()
     }
-    
-    func startRunning() {
+
+    // MARK: - Settings
+
+    func setupHierarchy() {
         view.layer.addSublayer(video)
-        
         view.addSubview(qrCodeFrameView)
         view.addSubview(prescriptionLabel)
         view.bringSubviewToFront(qrCodeFrameView)
         view.bringSubviewToFront(prescriptionLabel)
-        setupLayout()
-        
-        session.startRunning()
     }
 
-    @IBAction func scanQRAction(_ sender: Any) {
-        startRunning()
+    func setupLayout() {
+        video.frame = view.layer.bounds
+
+        qrCodeFrameView.widthAnchor.constraint(equalToConstant: 200).isActive = true
+        qrCodeFrameView.heightAnchor.constraint(equalToConstant: 200).isActive = true
+        qrCodeFrameView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+        qrCodeFrameView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor, constant: -50).isActive = true
+
+        prescriptionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20).isActive = true
+        prescriptionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20).isActive = true
+        prescriptionLabel.topAnchor.constraint(equalTo: qrCodeFrameView.bottomAnchor, constant: 40).isActive = true
     }
+
+//    @IBAction func scanQRAction(_ sender: Any) {
+//
+//    }
     
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupVideo()
+        setupHierarchy()
+        setupLayout()
+
+//        view.addSubview(container)
+//        container.layer.addSublayer(video)
+//
+//        container.frame = view.frame
+//        video.frame = container.layer.bounds
     }
 }
 
@@ -114,12 +127,6 @@ extension ViewController: AVCaptureMetadataOutputObjectsDelegate {
                 alert.addAction(UIAlertAction(title: "Отменить", style: .default, handler: { (action) in
                     self.session.startRunning()
                 }))
-//                alert.addAction(UIAlertAction(title: "Копировать", style: .default, handler: { (action) in
-//                    UIPasteboard.general.string = object.stringValue
-//                    self.view.layer.sublayers?.removeLast()
-//                    self.session.stopRunning()
-//                    print(object.stringValue)
-//                }))
                 present(alert, animated: true, completion: nil)
             }
         }
