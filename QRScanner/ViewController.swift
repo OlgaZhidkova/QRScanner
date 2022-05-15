@@ -38,12 +38,6 @@ class ViewController: UIViewController {
         return label
     }()
 
-//    var container: UIView = {
-//        let view = UIView()
-//        view.backgroundColor = .red
-//        return view
-//    }()
-
     // MARK: - Настройка видео
     
     func setupVideo() {
@@ -62,7 +56,7 @@ class ViewController: UIViewController {
     
         output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
         output.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
-        
+
         video = AVCaptureVideoPreviewLayer(session: session)
         session.startRunning()
     }
@@ -101,12 +95,6 @@ class ViewController: UIViewController {
         setupVideo()
         setupHierarchy()
         setupLayout()
-
-//        view.addSubview(container)
-//        container.layer.addSublayer(video)
-//
-//        container.frame = view.frame
-//        video.frame = container.layer.bounds
     }
 }
 
