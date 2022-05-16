@@ -46,25 +46,41 @@ class ViewController: UIViewController {
         // 3. Настроим input
         do {
             let input = try AVCaptureDeviceInput(device: captureDevice!)
-            session.addInput(input)
+            if session.inputs.isEmpty {
+                session.addInput(input)
+            }
         } catch {
             fatalError(error.localizedDescription)
         }
         // 4. Настроим output
         let output = AVCaptureMetadataOutput()
-        session.addOutput(output)
-    
+
+        for output in session.outputs {
+            session.removeOutput(output)
+        }
+
+        if session.canAddOutput(output) {
+            session.addOutput(output)
+        } else {
+            fatalError("could not add video output")
+        }
+
+        // Настраиваем распознавание qr кода
         output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
         output.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
 
+        // Настроим превью
         video = AVCaptureVideoPreviewLayer(session: session)
+        view.layer.addSublayer(video)
+        video.frame = view.bounds
+
+        // Запускаем сессию
         session.startRunning()
     }
 
     // MARK: - Settings
 
     func setupHierarchy() {
-        view.layer.addSublayer(video)
         view.addSubview(qrCodeFrameView)
         view.addSubview(prescriptionLabel)
         view.bringSubviewToFront(qrCodeFrameView)
@@ -72,8 +88,6 @@ class ViewController: UIViewController {
     }
 
     func setupLayout() {
-        video.frame = view.layer.bounds
-
         qrCodeFrameView.widthAnchor.constraint(equalToConstant: 200).isActive = true
         qrCodeFrameView.heightAnchor.constraint(equalToConstant: 200).isActive = true
         qrCodeFrameView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
@@ -92,9 +106,19 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupVideo()
         setupHierarchy()
         setupLayout()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        setupVideo()
+        session.startRunning()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        session.stopRunning()
     }
 }
 
